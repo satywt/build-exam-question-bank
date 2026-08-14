@@ -1,0 +1,4 @@
+interface:
+  display_name: "备考题库生成器"
+  short_description: "从 PDF 和图片题目提取、去重并生成可练习题库网站"
+  default_prompt: "Use $build-exam-question-bank to turn my uploaded exam materials into a named, deduplicated study question bank."
