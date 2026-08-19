@@ -20,6 +20,8 @@ Turn heterogeneous exam material into a traceable question dataset and a usable 
 - Use the relevant document or spreadsheet skill for those formats.
 - Preserve page number, source filename, original question number, question text, options, marked answer, explanation, and visible section heading.
 - Treat layout as evidence. Detect options printed on one line, separated by punctuation or spacing, as individual choices even when OCR does not preserve line breaks or A/B/C labels.
+- Detect structured data embedded in question stems, including assessment results, before/after comparisons, nutrition logs, training records, weekly schedules, and other row-and-column layouts. Reinspect the rendered source page to recover headers, row labels, cells, units, and their order instead of accepting flattened OCR text.
+- Store recovered tabular content as structured table data separate from the narrative stem. Do not leave a source table as one long sentence or infer missing cells solely from reading order.
 - Do not downgrade an apparent multiple-choice question into an open-ended recall card merely because option parsing failed. Reinspect the rendered page and nearby text first. Use a recall card only when the source genuinely lacks recoverable choices.
 - Mark unreadable or truncated content instead of guessing. Retain the page image reference when manual review may be needed.
 - Process all pages, then reconcile extracted question counts with source numbering and answer-key ranges.
@@ -49,6 +51,7 @@ Read [references/question-schema.md](references/question-schema.md) before creat
 - Run `scripts/validate_question_bank.py BANK.json` for JSON datasets that follow the bundled schema.
 - Resolve invalid answer labels, duplicate IDs, missing sources, empty stems, and too-few options.
 - Compare every question that was reconstructed, marked incomplete, or parsed from dense layouts against the rendered source page. Pay special attention to stems continued on another line/page and several options printed on one line.
+- For each recovered table, compare its header count, row count, cell placement, units, and labels against the rendered source. Mark ambiguous spans or unreadable cells for verification rather than shifting values into a neighboring column.
 - Spot-check additional complete questions from every source and domain against rendered source pages.
 - Verify every referenced media asset loads and belongs to the intended question. Report missing and ambiguous matches.
 - Never claim every source question is included unless coverage checks support that claim. State any unreadable pages or omitted fragments.
@@ -68,10 +71,19 @@ Provide, unless the user requests otherwise:
 - persisted progress, answer statistics, uncertain marks, and notes;
 - resumable progress for each independent bank and domain practice mode;
 - a draggable progress control that can jump directly to a question while clearing only the destination view's transient choice/reveal state;
+- semantic table rendering for tabular question data, with the narrative prompt above the table, visible headers, row labels, and preserved units;
 - mobile-friendly, accessible controls and a light visual system;
 - visible question counts based on actual imported data.
 
 Keep independent banks separate at the top level. Combine them only in explicitly cross-bank views such as domain practice or the wrong-answer notebook.
+
+### Table presentation rules
+
+- Render source tables with semantic HTML table elements; do not simulate columns with spaces or concatenate cells into the heading.
+- Keep the table associated with the stable question ID so it appears in source-bank practice, domain practice, and wrong-answer review wherever that question is rendered.
+- On narrow screens, preserve the column structure and allow horizontal scrolling. Do not shrink text until cells become unreadable or reflow rows into an ambiguous sentence.
+- Use clear header contrast, cell borders, left-aligned values, and accessible row or column headers. Preserve source units and meaningful symbols.
+- Keep editorial cleanup limited to spacing, typography, and clearly supported OCR corrections. If the source layout is unclear, retain a source-page reference and mark the table `verify`.
 
 ### Learning-state rules
 
