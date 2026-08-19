@@ -19,6 +19,13 @@ Use a JSON object with bank metadata and a `questions` array. A flat array is ac
       "options": [{"label": "A", "text": "选项"}],
       "answer": "A",
       "explanation": "解析或空字符串",
+      "table": {
+        "headers": ["项目", "训练前", "训练后"],
+        "rows": [
+          ["体重", "130 lb（59 kg）", "124 lb（56 kg）"],
+          ["身体脂肪", "30%", "25%"]
+        ]
+      },
       "media": [{"type": "gif", "file": "exercise-01.gif", "alt": "动作演示"}],
       "confidence": "high",
       "reviewNote": ""
@@ -38,6 +45,7 @@ Use a JSON object with bank metadata and a `questions` array. A flat array is ac
 - Options may originate on one source line; their source layout does not change the multiple-choice kind.
 - Recall questions use `answerText` instead of `options` and `answer`.
 - `confidence` is `high`, `medium`, or `verify`.
+- `table`, when present, keeps source headers and rows as separate cells. Every row has the same number of cells as `headers`; keep units inside their corresponding cells.
 - `media`, when present, contains a verified `type`, durable `file` or URL, and accessible `alt` text. Keep the cited source filename when it differs from the stored filename.
 
 ## Deduplication record
