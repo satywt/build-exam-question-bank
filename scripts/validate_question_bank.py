@@ -34,6 +34,17 @@ def main() -> int:
             if str(q.get("answer")) not in labels: errors.append(f"{where}: answer does not match an option")
         if q.get("kind") == "recall" and not str(q.get("answerText", "")).strip():
             errors.append(f"{where}: recall question missing answerText")
+        media = q.get("media", [])
+        if media and not isinstance(media, list):
+            errors.append(f"{where}: media must be an array")
+        elif isinstance(media, list):
+            for j, item in enumerate(media, 1):
+                if not isinstance(item, dict):
+                    errors.append(f"{where}: media {j} must be an object")
+                    continue
+                if not str(item.get("type", "")).strip(): errors.append(f"{where}: media {j} missing type")
+                if not str(item.get("file", item.get("url", ""))).strip(): errors.append(f"{where}: media {j} missing file or url")
+                if not str(item.get("alt", "")).strip(): errors.append(f"{where}: media {j} missing alt text")
     if errors:
         print("\n".join(f"ERROR: {e}" for e in errors))
         print(f"FAILED: {len(errors)} issue(s) in {len(questions)} questions")
