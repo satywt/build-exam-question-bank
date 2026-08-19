@@ -34,6 +34,20 @@ def main() -> int:
             if str(q.get("answer")) not in labels: errors.append(f"{where}: answer does not match an option")
         if q.get("kind") == "recall" and not str(q.get("answerText", "")).strip():
             errors.append(f"{where}: recall question missing answerText")
+        table = q.get("table")
+        if table is not None:
+            if not isinstance(table, dict):
+                errors.append(f"{where}: table must be an object")
+            else:
+                headers, rows = table.get("headers"), table.get("rows")
+                if not isinstance(headers, list) or not headers or any(not str(x).strip() for x in headers):
+                    errors.append(f"{where}: table requires non-empty headers")
+                if not isinstance(rows, list) or not rows:
+                    errors.append(f"{where}: table requires rows")
+                elif isinstance(headers, list):
+                    for j, row in enumerate(rows, 1):
+                        if not isinstance(row, list) or len(row) != len(headers):
+                            errors.append(f"{where}: table row {j} does not match header count")
         media = q.get("media", [])
         if media and not isinstance(media, list):
             errors.append(f"{where}: media must be an array")
