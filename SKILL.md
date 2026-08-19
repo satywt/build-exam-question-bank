@@ -19,8 +19,11 @@ Turn heterogeneous exam material into a traceable question dataset and a usable 
 - Use the PDF skill for PDFs and scanned/image PDFs. Detect pages without usable text and apply OCR/render inspection as needed.
 - Use the relevant document or spreadsheet skill for those formats.
 - Preserve page number, source filename, original question number, question text, options, marked answer, explanation, and visible section heading.
+- Treat layout as evidence. Detect options printed on one line, separated by punctuation or spacing, as individual choices even when OCR does not preserve line breaks or A/B/C labels.
+- Do not downgrade an apparent multiple-choice question into an open-ended recall card merely because option parsing failed. Reinspect the rendered page and nearby text first. Use a recall card only when the source genuinely lacks recoverable choices.
 - Mark unreadable or truncated content instead of guessing. Retain the page image reference when manual review may be needed.
 - Process all pages, then reconcile extracted question counts with source numbering and answer-key ranges.
+- When a question cites an image, GIF, video, or other media filename, inventory the supplied media folder and associate the exact or normalized filename with the question. Record unmatched questions and orphaned media for review; never substitute a visually similar file without evidence.
 
 ## Normalize and classify
 
@@ -45,7 +48,9 @@ Read [references/question-schema.md](references/question-schema.md) before creat
 
 - Run `scripts/validate_question_bank.py BANK.json` for JSON datasets that follow the bundled schema.
 - Resolve invalid answer labels, duplicate IDs, missing sources, empty stems, and too-few options.
-- Spot-check a sample from every source and domain against rendered source pages.
+- Compare every question that was reconstructed, marked incomplete, or parsed from dense layouts against the rendered source page. Pay special attention to stems continued on another line/page and several options printed on one line.
+- Spot-check additional complete questions from every source and domain against rendered source pages.
+- Verify every referenced media asset loads and belongs to the intended question. Report missing and ambiguous matches.
 - Never claim every source question is included unless coverage checks support that claim. State any unreadable pages or omitted fragments.
 
 ## Build the study experience
@@ -58,17 +63,31 @@ Provide, unless the user requests otherwise:
 - domain-based practice that combines eligible questions from all banks while showing source labels;
 - immediate answer feedback and explanations;
 - automatic wrong-answer notebook with removal after a later correct answer;
-- persisted progress and answer statistics in browser storage;
+- an `不确定` action beside the answer action, visually secondary but on the same row, and an `不确定` label for these questions in the wrong-answer notebook;
+- a per-question note area available regardless of correctness;
+- persisted progress, answer statistics, uncertain marks, and notes;
+- resumable progress for each independent bank and domain practice mode;
+- a draggable progress control that can jump directly to a question while clearing only the destination view's transient choice/reveal state;
 - mobile-friendly, accessible controls and a light visual system;
 - visible question counts based on actual imported data.
 
 Keep independent banks separate at the top level. Combine them only in explicitly cross-bank views such as domain practice or the wrong-answer notebook.
+
+### Learning-state rules
+
+- Prefer stable question IDs as the storage key for answers, wrong/uncertain status, and notes. Never key durable learning records only by array position.
+- When personal accounts or multi-device sync are requested, store learning state in an authenticated server-side database. Browser storage is acceptable only for an explicitly local, single-browser experience.
+- Treat normal bank practice, domain practice, and wrong-answer review as separate navigation sessions. Opening or seeking within the wrong-answer notebook must not overwrite the saved position of the source bank.
+- Save the normal bank's position only during normal bank practice. A later correct answer may remove the wrong-answer status without deleting the user's note or unrelated uncertainty mark unless the product specification says otherwise.
+- Preserve learning records across question-bank updates by keeping existing IDs stable and migrating records when an unavoidable ID change is documented.
+- Media should be referenced through durable project paths or storage URLs, with descriptive fallback text when it cannot load.
 
 ## Update an existing bank
 
 - Preserve stable IDs for existing questions.
 - Deduplicate new material against the full existing dataset, not only the new upload batch.
 - Preserve user progress by avoiding index-based identity when stable question IDs are available.
+- Keep existing answers, notes, wrong/uncertain labels, and independent progress records intact. Test that review-mode navigation and progress-bar seeking do not alter normal bank resume positions.
 - Recalculate counts and domain indexes after the merge.
 - Build, validate, and publish the exact updated state when the project is hosted.
 
