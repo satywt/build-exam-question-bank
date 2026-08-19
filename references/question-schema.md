@@ -19,6 +19,7 @@ Use a JSON object with bank metadata and a `questions` array. A flat array is ac
       "options": [{"label": "A", "text": "选项"}],
       "answer": "A",
       "explanation": "解析或空字符串",
+      "media": [{"type": "gif", "file": "exercise-01.gif", "alt": "动作演示"}],
       "confidence": "high",
       "reviewNote": ""
     }
@@ -34,9 +35,29 @@ Use a JSON object with bank metadata and a `questions` array. A flat array is ac
 - `sourceRefs` contains at least one traceable source.
 - `stem` is non-empty.
 - Multiple-choice questions have at least two options and an answer matching an option label.
+- Options may originate on one source line; their source layout does not change the multiple-choice kind.
 - Recall questions use `answerText` instead of `options` and `answer`.
 - `confidence` is `high`, `medium`, or `verify`.
+- `media`, when present, contains a verified `type`, durable `file` or URL, and accessible `alt` text. Keep the cited source filename when it differs from the stored filename.
 
 ## Deduplication record
 
 When auditability matters, add `mergedFrom` with prior IDs or source-local identifiers. Never discard source citations during a merge.
+
+## Learning-state schema
+
+Keep user-specific state separate from the question dataset so content updates do not overwrite study history. A practical record is keyed by authenticated user and stable question ID:
+
+```json
+{
+  "userId": "account-id",
+  "questionId": "official-187-001",
+  "selectedAnswer": "B",
+  "isCorrect": false,
+  "isUncertain": true,
+  "note": "复习心率控制模式",
+  "updatedAt": "ISO-8601 timestamp"
+}
+```
+
+Store resume positions separately by user and practice context, for example `bank:official-187` or `domain:nutrition`. Wrong-answer review uses its own context and must not write the source bank's resume position.
